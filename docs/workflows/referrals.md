@@ -6,6 +6,7 @@ Referrals are sent by demand agencies through Marketplace to authorize your orga
 
 - [Environment setup](../setup.md) complete
 - `sub_inbox_referrals` event subscription active
+- Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
@@ -14,6 +15,16 @@ Referrals are sent by demand agencies through Marketplace to authorize your orga
 When a demand agency sends a referral, your SQS queue receives a `sub_inbox_referrals` event payload containing the referral identifier.
 
 - **AsyncAPI reference:** [sub_inbox_referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)
+
+**Example SQS payload** (see the AsyncAPI spec for the full schema):
+
+```json
+{
+  "event_type": "sub_inbox_referrals",
+  "alayamarket_id": "ref-456",
+  "timestamp": "2026-04-10T14:30:00Z"
+}
+```
 
 ---
 
@@ -25,13 +36,33 @@ You can fetch the referral using either the Marketplace message ID or the intern
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/referrals/by_message_id/{alayamarket_id}/id`
 
+* **Response:** Returns the internal AlayaCare integer referral ID.
+
+```json
+{
+  "id": 789
+}
+```
+
 * **Notes:**
   * `{alayamarket_id}` is the Marketplace referral/message ID from the event payload
-  * Returns the internal AlayaCare referral ID
 
 ### Option B: Fetch Referral Details by Internal ID
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/referrals/alayamarket/{referral_id}`
+
+* **Response:** Returns the full referral object. Refer to the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/) for the canonical field list. Key fields include:
+
+```json
+{
+  "id": 789,
+  "external_referral_id": "ref-456",
+  "status": "pending",
+  "client": { "first_name": "...", "last_name": "...", "date_of_birth": "...", "phone": "..." },
+  "service": { "care_type": "...", "start_date": "...", "end_date": "...", "authorization": { "..." } },
+  "demand_agency": { "name": "..." }
+}
+```
 
 * **Notes:**
   * Returns the full referral details including client demographics, service details, and authorization information
@@ -60,6 +91,8 @@ GET $ACCLOUD_URL/ext/api/v2/patients/clients?page=1&count=100&filter=first_name:
 ### Optional: Verify Client Details
 
 If you find a potential match, you can fetch the full client record for additional verification:
+
+* **API reference:** [client-api-external — Clients](https://app.swaggerhub.com/apis/AlayaCare/client-api-external#/Clients)
 
 * **URL:** `GET $ACCLOUD_URL/ext/api/v2/patients/clients/{alayacare_client_id}?exclude_user_deactivated_groups=false`
 
@@ -90,9 +123,21 @@ Use when no existing client or service was found.
 
 * **URL:** `POST $ACCLOUD_URL/api/v2/intake/referrals/alayamarket/{referral_id}/process`
 
+* **Response:** Returns the created client and service IDs.
+
+```json
+{
+  "status": "processed",
+  "alayacare_client_id": 1060,
+  "alayacare_service_id": 21
+}
+```
+
 * **Notes:**
   * No request body required
   * AlayaCare will create both a new client record and a new service from the referral data
+
+See [examples/payloads/referral_process_new.json](../../examples/payloads/referral_process_new.json).
 
 ### Strategy B: Existing Client + New Service
 
@@ -141,6 +186,23 @@ Use when you matched both an existing client and an existing service.
   * The referral will be linked to the existing client and service
 
 See [examples/payloads/referral_process_existing_both.json](../../examples/payloads/referral_process_existing_both.json).
+
+---
+
+## Step 6: Handle Referral Cancellation
+
+The demand agency may cancel a referral after sending it. Your integration should listen for this event and clean up any downstream state.
+
+* **Event:** `ReferralDemandCancelled` via `sub_inbox_referrals`
+* **When:** The demand agency cancels a referral that was previously sent to your organization.
+
+* **Recommended handling:**
+  1. Receive the `ReferralDemandCancelled` event from your SQS queue.
+  2. Fetch the referral status to confirm cancellation.
+  3. Cancel any downstream scheduling (pending visits) associated with this referral.
+  4. Update your internal state to reflect the referral is no longer active.
+
+> If the referral was already processed and visits are scheduled, coordinate with the demand agency before cancelling active care.
 
 ---
 

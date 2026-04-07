@@ -6,6 +6,7 @@ Visit management allows your organization to report scheduled care visits back t
 
 - [Environment setup](../setup.md) complete
 - A processed referral with a known `alayacare_client_id` (from the [referral workflow](referrals.md))
+- Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
@@ -13,7 +14,7 @@ Visit management allows your organization to report scheduled care visits back t
 
 Schedule a new visit for a client.
 
-* **API reference:** [scheduler-api-external — Visits](https://app.swaggerhub.com/apis/AlayaCare/scheduler-api-external/1.0.17#/Visits)
+* **API reference:** [scheduler-api-external — Visits](https://app.swaggerhub.com/apis/AlayaCare/scheduler-api-external#/Visits)
 
 * **URL:** `POST $ACCLOUD_URL/ext/api/v2/scheduler/visits/`
 
@@ -24,6 +25,15 @@ Schedule a new visit for a client.
   "start_at": "2026-04-15T09:00:00+00:00",
   "end_at": "2026-04-15T11:00:00+00:00",
   "alayacare_client_id": 1060
+}
+```
+
+* **Response:** Returns the created visit ID. Store this for subsequent updates and cancellations.
+
+```json
+{
+  "visit_id": 5001,
+  "status": "scheduled"
 }
 ```
 
@@ -40,6 +50,8 @@ See [examples/payloads/create_visit.json](../../examples/payloads/create_visit.j
 ## Step 2: Update a Visit
 
 Modify the schedule of an existing visit.
+
+* **API reference:** [scheduler-api-external — Visits](https://app.swaggerhub.com/apis/AlayaCare/scheduler-api-external#/Visits)
 
 * **URL:** `PUT $ACCLOUD_URL/ext/api/v2/scheduler/visits/{visit_id}`
 
@@ -62,6 +74,8 @@ Modify the schedule of an existing visit.
 ## Step 3: Cancel a Visit
 
 Cancel an existing visit with a reason code.
+
+* **API reference:** [scheduler-api-external — Visits](https://app.swaggerhub.com/apis/AlayaCare/scheduler-api-external#/Visits)
 
 * **URL:** `PUT $ACCLOUD_URL/ext/api/v2/scheduler/visits/{visit_id}`
 

@@ -9,7 +9,7 @@ This guide covers provisioning, authentication, and event configuration for 3rd-
 | UAT | `https://{partner}.uat.alayacare.com` | Integration development and testing |
 | Production | `https://{partner}.alayacare.com` | Live environment |
 
-Replace `{partner}` with your provisioned subdomain (e.g. `myreferrals`).
+Replace `{partner}` with your provisioned subdomain.
 
 Throughout this guide, all URLs use the placeholder `$ACCLOUD_URL` to represent your environment's base URL.
 
@@ -48,7 +48,7 @@ An employee user with the **External API** role is associated with your integrat
 - **Location:** `$ACCLOUD_URL/#/employees/{employee_id}/overview`
 - **Role:** External API
 
-## Event Subscriptions (Work in Progress)
+## Event Subscriptions
 
 Your integration receives real-time notifications from Marketplace via AlayaCare's external event system (SQS queues).
 

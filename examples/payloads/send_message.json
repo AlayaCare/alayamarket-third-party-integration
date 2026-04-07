@@ -1,0 +1,9 @@
+{
+  "_description": "POST as multipart/form-data — this JSON shows the field names and expected values",
+  "branch_id": "{BRANCH_ID}",
+  "alayamarket_sequence_id": "{sequence_id}",
+  "category": "comment",
+  "sender_type": "supply",
+  "text": "We have reviewed the referral and will begin care on Monday.",
+  "author": "Jane Doe"
+}

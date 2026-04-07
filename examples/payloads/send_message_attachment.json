@@ -1,0 +1,10 @@
+{
+  "_description": "POST as multipart/form-data with file field — this JSON shows the field names and expected values",
+  "branch_id": "{BRANCH_ID}",
+  "alayamarket_sequence_id": "{sequence_id}",
+  "category": "client_attachment",
+  "sender_type": "supply",
+  "text": "Attached is the signed care plan.",
+  "author": "Jane Doe",
+  "file": "(binary — attach the file)"
+}

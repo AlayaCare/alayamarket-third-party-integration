@@ -16,16 +16,7 @@ When a demand agency sends a message, your SQS queue receives a `sub_inbox_messa
 
 - **AsyncAPI reference:** [sub_inbox_messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages)
 
-**Example SQS payload** (see the AsyncAPI spec for the full schema):
-
-```json
-{
-  "event_type": "sub_inbox_messages",
-  "alayamarket_sequence_id": "seq-001",
-  "message_id": 101,
-  "timestamp": "2026-04-10T15:00:00Z"
-}
-```
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages) for the full payload schema and examples.
 
 ---
 
@@ -45,26 +36,7 @@ Retrieve messages for a given referral sequence.
 | `page` | No | Page number (default: 1) |
 | `sort_order` | No | `asc` or `desc` (default: `asc`). Pass `desc` explicitly for newest-first. |
 
-* **Response:** Returns a paginated array of message objects. Refer to the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/) for the canonical field list.
-
-```json
-{
-  "items": [
-    {
-      "id": 101,
-      "category": "comment",
-      "sender_type": "demand",
-      "text": "Please confirm care plan.",
-      "author": "John Smith",
-      "created_at": "2026-04-10T14:30:00Z",
-      "file_id": null
-    }
-  ],
-  "page": 1,
-  "items_per_page": 10,
-  "total": 1
-}
-```
+* **Response:** Returns a paginated array of message objects.
 
 **Pagination:** To retrieve all messages, loop through pages until `page * items_per_page >= total`. Increment `page` by 1 on each request.
 
@@ -250,10 +222,10 @@ Use the file ID from a message (fetched in Step 2) to get a preview/download lin
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send message
     MP->>AC: Deliver message
@@ -269,6 +241,14 @@ sequenceDiagram
     3P->>AC: POST send message with attachment
     AC->>MP: Relay attachment
     MP->>DA: Deliver attachment
+
+    DA->>MP: Send message with attachment
+    MP->>AC: Deliver message + file
+    AC-->>3P: sub_inbox_messages event (SQS)
+    3P->>AC: GET messages for sequence
+    AC-->>3P: Message list (includes file_id)
+    3P->>AC: GET file preview by file_id
+    AC-->>3P: Pre-signed download URL
 ```
 
 ---

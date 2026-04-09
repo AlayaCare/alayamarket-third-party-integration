@@ -16,15 +16,7 @@ When a demand agency sends a referral, your SQS queue receives a `sub_inbox_refe
 
 - **AsyncAPI reference:** [sub_inbox_referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)
 
-**Example SQS payload** (see the AsyncAPI spec for the full schema):
-
-```json
-{
-  "event_type": "sub_inbox_referrals",
-  "alayamarket_id": "ref-456",
-  "timestamp": "2026-04-10T14:30:00Z"
-}
-```
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) for the full payload schema and examples.
 
 ---
 
@@ -51,21 +43,7 @@ You can fetch the referral using either the Marketplace message ID or the intern
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/referrals/alayamarket/{referral_id}`
 
-* **Response:** Returns the full referral object. Refer to the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/) for the canonical field list. Key fields include:
-
-```json
-{
-  "id": 789,
-  "external_referral_id": "ref-456",
-  "status": "pending",
-  "client": { "first_name": "...", "last_name": "...", "date_of_birth": "...", "phone": "..." },
-  "service": { "care_type": "...", "start_date": "...", "end_date": "...", "authorization": { "..." } },
-  "demand_agency": { "name": "..." }
-}
-```
-
-* **Notes:**
-  * Returns the full referral details including client demographics, service details, and authorization information
+* **Response:** Returns the full referral object including client demographics, service details, and authorization information. <!-- TODO: link to api.intake OpenAPI spec once published -->
 
 ---
 
@@ -224,10 +202,10 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send referral
     MP->>AC: Deliver referral

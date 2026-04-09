@@ -16,15 +16,7 @@ When a demand agency sends an offer, your SQS queue receives a `sub_inbox_offers
 
 - **AsyncAPI reference:** [sub_inbox_offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
 
-**Example SQS payload** (see the AsyncAPI spec for the full schema):
-
-```json
-{
-  "event_type": "sub_inbox_offers",
-  "offer_id": "abc-123",
-  "timestamp": "2026-04-10T14:00:00Z"
-}
-```
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) for the full payload schema and examples.
 
 ---
 
@@ -51,18 +43,7 @@ You can fetch the offer using either the external (Marketplace) offer ID or the 
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/offers/{offer_id}`
 
-* **Response:** Returns the full offer object. Refer to the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/) for the canonical field list. Key fields include:
-
-```json
-{
-  "id": 42,
-  "external_offer_id": "abc-123",
-  "status": "pending",
-  "client": { "first_name": "...", "last_name": "...", "date_of_birth": "..." },
-  "service": { "care_type": "...", "start_date": "...", "end_date": "..." },
-  "demand_agency": { "name": "..." }
-}
-```
+* **Response:** Returns the full offer object including client demographics, service details, and demand agency info. <!-- TODO: link to api.intake OpenAPI spec once published -->
 
 * **Notes:**
   * `{offer_id}` is the internal AlayaCare offer ID (from Option A or from the event payload if already resolved)
@@ -133,7 +114,7 @@ An offer may be withdrawn or resolved by the demand side before your integration
 | Event | Meaning | Recommended Action |
 |-------|---------|-------------------|
 | `OfferClosed` | The demand agency withdrew the offer. | Remove the offer from your pending queue. Cancel any internal workflows initiated for this offer. |
-| `OfferExpired` | The offer timed out without a response. | Clean up internal state. No further action possible on this offer. |
+| `OfferExpired` | The offer timed out without a response. | Remove the offer from your pending queue. Clean up internal state. No further action possible on this offer. |
 | `OfferFulfilled` | Another supply agency was assigned. | Remove the offer from your pending queue. Stop polling for this offer. |
 
 > Always fetch the offer status before attempting to accept or decline. If the offer is in a terminal state (`closed`, `expired`, `fulfilled`), skip processing and log the outcome.
@@ -144,10 +125,10 @@ An offer may be withdrawn or resolved by the demand side before your integration
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send offer
     MP->>AC: Deliver offer

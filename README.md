@@ -15,7 +15,7 @@ Technical documentation for 3rd-party suppliers integrating onto [AlayaCare Mark
 
 ```mermaid
 sequenceDiagram
-    participant 3P as 3rd-Party System
+    participant 3P as Your System
     participant AC as ACCloud Bridge
     participant MP as Marketplace
     participant DA as Demand Agency
@@ -99,5 +99,5 @@ sequenceDiagram
 
 - [AM-4531](https://alayacare.atlassian.net/browse/AM-4531) — Jira epic for 3rd-party partner support
 - [ADM-2089](https://alayacare.atlassian.net/browse/ADM-2089) — Public documentation improvements
-- [AlayaMarket External Docs](https://alayacare.github.io/alayamarket-external-docs/) — Full Marketplace API documentation
+- [AlayaMarket External Docs](https://alayacare.github.io/alayamarket-external-docs/) — OpenAPI and AsyncAPI specs for the core Marketplace service. Note: integrators connect via ACCloud (`api.alayamarket`), which proxies these endpoints — some request/response details may differ from what is shown in these specs.
 - [AlayaCare SwaggerHub](https://app.swaggerhub.com/search?owner=AlayaCare) — All AlayaCare external API specs

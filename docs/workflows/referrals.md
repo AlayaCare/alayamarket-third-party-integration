@@ -6,6 +6,7 @@ Referrals are sent by demand agencies through Marketplace to authorize your orga
 
 - [Environment setup](../setup.md) complete
 - `sub_inbox_referrals` event subscription active
+- Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
@@ -14,6 +15,8 @@ Referrals are sent by demand agencies through Marketplace to authorize your orga
 When a demand agency sends a referral, your SQS queue receives a `sub_inbox_referrals` event payload containing the referral identifier.
 
 - **AsyncAPI reference:** [sub_inbox_referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)
+
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) for the full payload schema and examples.
 
 ---
 
@@ -25,16 +28,22 @@ You can fetch the referral using either the Marketplace message ID or the intern
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/referrals/by_message_id/{alayamarket_id}/id`
 
+* **Response:** Returns the internal AlayaCare integer referral ID.
+
+```json
+{
+  "id": 789
+}
+```
+
 * **Notes:**
   * `{alayamarket_id}` is the Marketplace referral/message ID from the event payload
-  * Returns the internal AlayaCare referral ID
 
 ### Option B: Fetch Referral Details by Internal ID
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/referrals/alayamarket/{referral_id}`
 
-* **Notes:**
-  * Returns the full referral details including client demographics, service details, and authorization information
+* **Response:** Returns the full referral object including client demographics, service details, and authorization information. <!-- TODO: link to api.intake OpenAPI spec once published -->
 
 ---
 
@@ -60,6 +69,8 @@ GET $ACCLOUD_URL/ext/api/v2/patients/clients?page=1&count=100&filter=first_name:
 ### Optional: Verify Client Details
 
 If you find a potential match, you can fetch the full client record for additional verification:
+
+* **API reference:** [client-api-external — Clients](https://app.swaggerhub.com/apis/AlayaCare/client-api-external#/Clients)
 
 * **URL:** `GET $ACCLOUD_URL/ext/api/v2/patients/clients/{alayacare_client_id}?exclude_user_deactivated_groups=false`
 
@@ -90,9 +101,21 @@ Use when no existing client or service was found.
 
 * **URL:** `POST $ACCLOUD_URL/api/v2/intake/referrals/alayamarket/{referral_id}/process`
 
+* **Response:** Returns the created client and service IDs.
+
+```json
+{
+  "status": "processed",
+  "alayacare_client_id": 1060,
+  "alayacare_service_id": 21
+}
+```
+
 * **Notes:**
   * No request body required
   * AlayaCare will create both a new client record and a new service from the referral data
+
+See [examples/payloads/referral_process_new.json](../../examples/payloads/referral_process_new.json).
 
 ### Strategy B: Existing Client + New Service
 
@@ -144,6 +167,23 @@ See [examples/payloads/referral_process_existing_both.json](../../examples/paylo
 
 ---
 
+## Step 6: Handle Referral Cancellation
+
+The demand agency may cancel a referral after sending it. Your integration should listen for this event and clean up any downstream state.
+
+* **Event:** `ReferralDemandCancelled` via `sub_inbox_referrals`
+* **When:** The demand agency cancels a referral that was previously sent to your organization.
+
+* **Recommended handling:**
+  1. Receive the `ReferralDemandCancelled` event from your SQS queue.
+  2. Fetch the referral status to confirm cancellation.
+  3. Cancel any downstream scheduling (pending visits) associated with this referral.
+  4. Update your internal state to reflect the referral is no longer active.
+
+If the referral was already processed and visits are scheduled, coordinate with the demand agency before cancelling active care.
+
+---
+
 ## Decision Flowchart
 
 ```mermaid
@@ -162,10 +202,10 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send referral
     MP->>AC: Deliver referral

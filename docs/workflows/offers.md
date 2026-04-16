@@ -6,6 +6,7 @@ Offers are sent by demand agencies through Marketplace to your supply organizati
 
 - [Environment setup](../setup.md) complete
 - `sub_inbox_offers` event subscription active
+- Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
@@ -14,6 +15,8 @@ Offers are sent by demand agencies through Marketplace to your supply organizati
 When a demand agency sends an offer, your SQS queue receives a `sub_inbox_offers` event payload containing the offer identifier.
 
 - **AsyncAPI reference:** [sub_inbox_offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
+
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) for the full payload schema and examples.
 
 ---
 
@@ -25,17 +28,25 @@ You can fetch the offer using either the external (Marketplace) offer ID or the 
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/offers/alayamarket/by_external_offer_id/{offer_id}/id`
 
+* **Response:** Returns the internal AlayaCare integer offer ID.
+
+```json
+{
+  "id": 42
+}
+```
+
 * **Notes:**
   * `{offer_id}` is the Marketplace offer ID from the event payload
-  * Returns the internal AlayaCare offer ID
 
 ### Option B: Fetch Offer Details by Internal ID
 
 * **URL:** `GET $ACCLOUD_URL/api/v2/intake/offers/{offer_id}`
 
+* **Response:** Returns the full offer object including client demographics, service details, and demand agency info. <!-- TODO: link to api.intake OpenAPI spec once published -->
+
 * **Notes:**
   * `{offer_id}` is the internal AlayaCare offer ID (from Option A or from the event payload if already resolved)
-  * Returns the full offer details including client demographics, service info, and care type
 
 ---
 
@@ -46,6 +57,14 @@ After reviewing the offer details, respond by accepting or declining.
 ### Accept
 
 * **URL:** `POST $ACCLOUD_URL/api/v2/intake/offers/alayamarket/{offer_id}/accept`
+
+* **Response:** Returns a status confirmation.
+
+```json
+{
+  "status": "accepted"
+}
+```
 
 * **Notes:**
   * No request body required
@@ -63,9 +82,42 @@ After reviewing the offer details, respond by accepting or declining.
 }
 ```
 
+* **Valid `reason` values:**
+
+| Value | Meaning |
+|-------|---------|
+| `cancel` | General decline — no specific reason provided |
+| `no_capacity` | Your organization does not have available capacity |
+| `out_of_area` | The client's location is outside your service area |
+| `service_not_offered` | The requested care type is not offered by your organization |
+
+> If you're unsure which value to use, `cancel` is always accepted. The demand agency sees the reason you provide.
+
+* **Response:** Returns a status confirmation.
+
+```json
+{
+  "status": "refused"
+}
+```
+
 * **Notes:**
   * A `reason` must be provided
   * The demand agency will be notified of the decline via Marketplace
+
+---
+
+## Step 4: Handle Offer Lifecycle Events
+
+An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen for these events via `sub_inbox_offers`, remove the offer from your pending queue, and handle them gracefully.
+
+| Event | Meaning | Recommended Action |
+|-------|---------|-------------------|
+| `OfferClosed` | The demand agency withdrew the offer. | Cancel any internal workflows initiated for this offer. |
+| `OfferExpired` | The offer timed out without a response. | Clean up internal state. No further action possible on this offer. |
+| `OfferFulfilled` | Another supply agency was assigned. | Stop polling for this offer. |
+
+> Always fetch the offer status before attempting to accept or decline. If the offer is in a terminal state (`closed`, `expired`, `fulfilled`), skip processing and log the outcome.
 
 ---
 
@@ -73,10 +125,10 @@ After reviewing the offer details, respond by accepting or declining.
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send offer
     MP->>AC: Deliver offer

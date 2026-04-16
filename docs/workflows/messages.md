@@ -6,6 +6,7 @@ Messages allow your organization to communicate with demand agencies through Mar
 
 - [Environment setup](../setup.md) complete
 - `sub_inbox_messages` event subscription active
+- Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
@@ -14,6 +15,8 @@ Messages allow your organization to communicate with demand agencies through Mar
 When a demand agency sends a message, your SQS queue receives a `sub_inbox_messages` event.
 
 - **AsyncAPI reference:** [sub_inbox_messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages)
+
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages) for the full payload schema and examples.
 
 ---
 
@@ -31,7 +34,11 @@ Retrieve messages for a given referral sequence.
 | `alayamarket_sequence_id` | Yes | The sequence ID from the referral |
 | `items_per_page` | No | Number of results per page (default: 10) |
 | `page` | No | Page number (default: 1) |
-| `sort_order` | No | `asc` or `desc` (default: `desc`) |
+| `sort_order` | No | `asc` or `desc` (default: `asc`). Pass `desc` explicitly for newest-first. |
+
+* **Response:** Returns a paginated array of message objects.
+
+**Pagination:** To retrieve all messages, loop through pages until `page * items_per_page >= total`. Increment `page` by 1 on each request.
 
 * **Example:**
 
@@ -73,7 +80,17 @@ curl -X POST "$ACCLOUD_URL/api/v1/alayamarket/messages/supply" \
   -F "author=Jane Doe"
 ```
 
+* **Response:** Returns the created message ID.
+
+```json
+{
+  "id": 102
+}
+```
+
 See [examples/payloads/send_message.json](../../examples/payloads/send_message.json) for field reference.
+
+> **Upcoming enforcement:** The API currently accepts empty `text` for `comment` messages, but server-side validation will be enforced in a future release. Always send a non-empty `text` value to avoid future breakage.
 
 ---
 
@@ -81,7 +98,7 @@ See [examples/payloads/send_message.json](../../examples/payloads/send_message.j
 
 Upload a file to the client's attachments in AlayaCare. The file is stored under the client's Marketplace Documents folder.
 
-* **API reference:** [files-api-external](https://app.swaggerhub.com/apis/AlayaCare/files-api-external/1.0.0#/File/post_client__id___path_)
+* **API reference:** [files-api-external](https://app.swaggerhub.com/apis/AlayaCare/files-api-external#/File/post_client__id___path_)
 
 * **URL:** `POST $ACCLOUD_URL/ext/api/v2/files/client/{client_id}/{file_path}`
 
@@ -108,6 +125,17 @@ curl -X POST "$ACCLOUD_URL/ext/api/v2/files/client/{client_id}/marketplace-docum
 ### Find the File Path via Sequence
 
 * **URL:** `GET $ACCLOUD_URL/api/v1/alayamarket/inbox/sequences/by_service_id/{service_id}`
+
+* **Response:** Returns sequence metadata including identifiers and file path structure.
+
+```json
+{
+  "alayamarket_sequence_id": "seq-001",
+  "client_id": 1060,
+  "service_id": 21,
+  "file_path": "marketplace-documents/"
+}
+```
 
 * **Notes:**
   * Returns sequence metadata including the file path structure for the associated client and service
@@ -148,13 +176,25 @@ curl -X POST "$ACCLOUD_URL/api/v1/alayamarket/messages/supply" \
   -F "file=@/path/to/signed-care-plan.pdf"
 ```
 
+* **Response:** Returns the created message ID.
+
+```json
+{
+  "id": 103
+}
+```
+
 See [examples/payloads/send_message_attachment.json](../../examples/payloads/send_message_attachment.json) for field reference.
+
+> **Upcoming enforcement:** The API currently accepts missing `file` for `client_attachment` messages, but server-side validation will be enforced in a future release. Always include a `file` when `category` is `client_attachment`.
 
 ---
 
 ## Step 6: Retrieve an Attachment
 
 ### Option A: Retrieve a Client Attachment by Path
+
+* **API reference:** [files-api-external — File](https://app.swaggerhub.com/apis/AlayaCare/files-api-external#/File)
 
 * **URL:** `GET $ACCLOUD_URL/ext/api/v2/files/client/{client_id}/{file_path}`
 
@@ -168,16 +208,24 @@ Use the file ID from a message (fetched in Step 2) to get a preview/download lin
 
 * **URL:** `GET $ACCLOUD_URL/api/v1/alayamarket/messages/supply/files/{file_id}/preview?branch_id={BRANCH_ID}`
 
+* **Response:** Returns a pre-signed URL for file download.
+
+```json
+{
+  "url": "https://..."
+}
+```
+
 ---
 
 ## Sequence
 
 ```mermaid
 sequenceDiagram
-    participant DA as Demand Agency
-    participant MP as Marketplace
-    participant AC as ACCloud Bridge
     participant 3P as Your System
+    participant AC as ACCloud Bridge
+    participant MP as Marketplace
+    participant DA as Demand Agency
 
     DA->>MP: Send message
     MP->>AC: Deliver message
@@ -193,6 +241,14 @@ sequenceDiagram
     3P->>AC: POST send message with attachment
     AC->>MP: Relay attachment
     MP->>DA: Deliver attachment
+
+    DA->>MP: Send message with attachment
+    MP->>AC: Deliver message + file
+    AC-->>3P: sub_inbox_messages event (SQS)
+    3P->>AC: GET messages for sequence
+    AC-->>3P: Message list (includes file_id)
+    3P->>AC: GET file preview by file_id
+    AC-->>3P: Pre-signed download URL
 ```
 
 ---

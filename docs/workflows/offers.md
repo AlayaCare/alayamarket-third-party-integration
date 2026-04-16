@@ -111,6 +111,8 @@ After reviewing the offer details, respond by accepting or declining.
 
 An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen for these events via `sub_inbox_offers`, remove the offer from your pending queue, and handle them gracefully.
 
+| Event | Meaning | Recommended Action |
+|-------|---------|-------------------|
 | `OfferClosed` | The demand agency withdrew the offer. | Cancel any internal workflows initiated for this offer. |
 | `OfferExpired` | The offer timed out without a response. | Clean up internal state. No further action possible on this offer. |
 | `OfferFulfilled` | Another supply agency was assigned. | Stop polling for this offer. |

@@ -109,13 +109,11 @@ After reviewing the offer details, respond by accepting or declining.
 
 ## Step 4: Handle Offer Lifecycle Events
 
-An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen for these events via `sub_inbox_offers` and handle them gracefully.
+An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen for these events via `sub_inbox_offers`, remove the offer from your pending queue, and handle them gracefully.
 
-| Event | Meaning | Recommended Action |
-|-------|---------|-------------------|
-| `OfferClosed` | The demand agency withdrew the offer. | Remove the offer from your pending queue. Cancel any internal workflows initiated for this offer. |
-| `OfferExpired` | The offer timed out without a response. | Remove the offer from your pending queue. Clean up internal state. No further action possible on this offer. |
-| `OfferFulfilled` | Another supply agency was assigned. | Remove the offer from your pending queue. Stop polling for this offer. |
+| `OfferClosed` | The demand agency withdrew the offer. | Cancel any internal workflows initiated for this offer. |
+| `OfferExpired` | The offer timed out without a response. | Clean up internal state. No further action possible on this offer. |
+| `OfferFulfilled` | Another supply agency was assigned. | Stop polling for this offer. |
 
 > Always fetch the offer status before attempting to accept or decline. If the offer is in a terminal state (`closed`, `expired`, `fulfilled`), skip processing and log the outcome.
 

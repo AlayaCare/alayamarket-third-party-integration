@@ -180,7 +180,7 @@ The demand agency may cancel a referral after sending it. Your integration shoul
   3. Cancel any downstream scheduling (pending visits) associated with this referral.
   4. Update your internal state to reflect the referral is no longer active.
 
-> If the referral was already processed and visits are scheduled, coordinate with the demand agency before cancelling active care.
+If the referral was already processed and visits are scheduled, coordinate with the demand agency before cancelling active care.
 
 ---
 

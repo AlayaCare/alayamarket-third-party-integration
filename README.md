@@ -84,8 +84,7 @@ sequenceDiagram
 
 ## API References
 
-> AsyncAPI and OpenAPI specs are synced periodically from the main Marketplace codebase. If you encounter discrepancies, contact your AlayaCare integration contact for the latest spec.
-
+Some AsyncAPI and OpenAPI specs are synced from the codebase periodically. If you encounter discrepancies, contact your AlayaCare integration contact for the latest spec.
 | API | Spec |
 |-----|------|
 | Client API | [SwaggerHub — client-api-external](https://app.swaggerhub.com/apis/AlayaCare/client-api-external) |

@@ -12,7 +12,8 @@ Messages allow your organization to communicate with demand agencies through Mar
 
 ## Step 1: Receive Message Events
 
-When a demand agency sends a message, your SQS queue receives a `marketplace-demand-message` event (subtype typically `marketplace-demand-message-sent`).
+When a demand agency sends a message, your SQS queue receives a `marketplace-demand-message` event (example subtype: `marketplace-demand-message-sent`).
+```
 
 - **ACC event type (subscribe):** `marketplace-demand-message`
 - **AsyncAPI schema reference:** [inbox-messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages)

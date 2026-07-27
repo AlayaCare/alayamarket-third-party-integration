@@ -5,16 +5,17 @@ Messages allow your organization to communicate with demand agencies through Mar
 ## Prerequisites
 
 - [Environment setup](../setup.md) complete
-- `sub_inbox_messages` event subscription active
+- `marketplace-demand-message` event subscription active (group: `marketplace`)
 - Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
 ## Step 1: Receive Message Events
 
-When a demand agency sends a message, your SQS queue receives a `sub_inbox_messages` event.
+When a demand agency sends a message, your SQS queue receives a `marketplace-demand-message` event (subtype typically `marketplace-demand-message-sent`).
 
-- **AsyncAPI reference:** [sub_inbox_messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages)
+- **ACC event type (subscribe):** `marketplace-demand-message`
+- **AsyncAPI schema reference:** [inbox-messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages)
 
 See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages) for the full payload schema and examples.
 
@@ -229,7 +230,7 @@ sequenceDiagram
 
     DA->>MP: Send message
     MP->>AC: Deliver message
-    AC-->>3P: sub_inbox_messages event (SQS)
+    AC-->>3P: marketplace-demand-message (SQS)
     3P->>AC: GET messages for sequence
     AC-->>3P: Message list
 
@@ -244,7 +245,7 @@ sequenceDiagram
 
     DA->>MP: Send message with attachment
     MP->>AC: Deliver message + file
-    AC-->>3P: sub_inbox_messages event (SQS)
+    AC-->>3P: marketplace-demand-message (SQS)
     3P->>AC: GET messages for sequence
     AC-->>3P: Message list (includes file_id)
     3P->>AC: GET file preview by file_id

@@ -14,7 +14,7 @@ Referrals are sent by demand agencies through Marketplace to authorize your orga
 
 ## Step 1: Receive the Referral Event
 
-When a demand agency sends a referral, your SQS queue receives a `marketplace-demand-referral` event (subtype typically `marketplace-demand-referral-created`) containing the referral identifier.
+When a demand agency sends a referral, your SQS queue receives a `marketplace-demand-referral` event (example subtype: `marketplace-demand-referral-created`) containing the referral identifier.
 
 - **ACC event type (subscribe):** `marketplace-demand-referral`
 - **AsyncAPI schema reference:** [inbox-referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)

@@ -1,0 +1,20 @@
+{
+  "id": 42,
+  "offer_id": "c6279ce1-590e-462e-983f-db46eb2815e9",
+  "status": "Posted",
+  "payload": {
+    "offer": {
+      "id": "c6279ce1-590e-462e-983f-db46eb2815e9",
+      "shift_id": "1cfbd3e6-1933-4186-bb9e-39e93f7119e3",
+      "offer_type": "service",
+      "care_type": "psw",
+      "status": "open"
+    },
+    "demand": {
+      "name": "Example Demand Agency"
+    },
+    "service": {
+      "name": "Personal Care"
+    }
+  }
+}

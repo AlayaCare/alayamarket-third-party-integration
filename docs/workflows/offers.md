@@ -2,7 +2,7 @@
 
 Offers are sent by demand agencies through Marketplace to your supply organization. When an offer arrives, you receive a `sub_inbox_offers` event. Your integration should fetch the offer details and respond by accepting or declining.
 
-> **Bundle service offers:** If `payload.offer.shift_id` is present on the offer details, the offer is part of a multi-service bundle. Accepting or refusing one member applies to the whole set, and assignment yields one referral per service. See [Bundle Service Offers](bundle-service-offers.md).
+> **Bundle offers:** If `payload.offer.shift_id` is present on the offer details, the offer is part of a multi-service bundle. Accepting or refusing one member applies to the whole set, and assignment yields one referral per service. See [Bundle Offers](bundle-offers.md).
 
 ## Prerequisites
 
@@ -150,4 +150,4 @@ sequenceDiagram
 
 ---
 
-**Next:** [Bundle Service Offers](bundle-service-offers.md) (when `shift_id` is present) · [Referrals](referrals.md)
+**Next:** [Bundle Offers](bundle-offers.md) (when `shift_id` is present) · [Referrals](referrals.md)

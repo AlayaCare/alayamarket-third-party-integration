@@ -55,7 +55,7 @@ sequenceDiagram
 | # | Workflow | Description | Guide |
 |---|----------|-------------|-------|
 | 1 | **Offers** | Receive offers, fetch details, accept or decline | [docs/workflows/offers.md](docs/workflows/offers.md) |
-| 1b | **Bundle service offers** | Multi-service offers linked by `shift_id`; accept/refuse applies to the whole set; assignment yields one referral per service | [docs/workflows/bundle-service-offers.md](docs/workflows/bundle-service-offers.md) |
+| 1b | **Bundle offers** | Multi-service offers linked by `shift_id`; accept/refuse applies to the whole set; assignment yields one referral per service | [docs/workflows/bundle-offers.md](docs/workflows/bundle-offers.md) |
 | 2 | **Referrals** | Receive referrals, match to existing clients/services, process with multiple strategies | [docs/workflows/referrals.md](docs/workflows/referrals.md) |
 | 3 | **Messages** | Send and receive messages, upload and retrieve file attachments | [docs/workflows/messages.md](docs/workflows/messages.md) |
 | 4 | **Visits** | Create, update, and cancel scheduled visits | [docs/workflows/visits.md](docs/workflows/visits.md) |

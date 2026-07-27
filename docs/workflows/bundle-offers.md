@@ -1,6 +1,6 @@
-# Bundle Service Offers
+# Bundle Offers
 
-A **bundle service offer** is a set of Marketplace **service** offers that demand sends together. In APIs and events they still appear as individual offers, but they share one grouping ID — `shift_id` (shown as **Bundle ID** in the AlayaCare UI).
+A **bundle offer** is a set of Marketplace **service** offers that demand sends together. (By contrast, a *shift offer* groups visit offers.) In APIs and events they still appear as individual offers, but they share one grouping ID — `shift_id` (shown as **Bundle ID** in the AlayaCare UI).
 
 Accepting or refusing **any one** offer in the set applies to **every** offer that shares that `shift_id`. After demand assigns the bundle, you receive **one referral per service** and process each referral independently.
 
@@ -15,8 +15,8 @@ This page extends the base [Offers](offers.md) and [Referrals](referrals.md) wor
 
 ## How it differs from a single offer
 
-| Topic | Single offer | Bundle service offers |
-|-------|--------------|------------------------|
+| Topic | Single offer | Bundle offers |
+|-------|--------------|---------------|
 | Events | One `sub_inbox_offers` event | One event **per** service in the bundle |
 | Grouping field | `payload.offer.shift_id` is null / absent | Same non-null `payload.offer.shift_id` on every member |
 | Accept / refuse | Acts on that offer only | Acting on **any** member accepts or refuses **all** members |
@@ -27,7 +27,7 @@ This page extends the base [Offers](offers.md) and [Referrals](referrals.md) wor
 
 ## Step 1: Receive Offer Events
 
-Demand creates a bundle of service offers. Marketplace delivers a separate match for each service.
+Demand creates a bundle offer. Marketplace delivers a separate match for each service in the set.
 
 Your SQS queue receives **N** `sub_inbox_offers` events (typically `OfferMatched`), each with its own `offer_id`.
 
@@ -52,7 +52,7 @@ payload.offer.shift_id
 
 See [examples/payloads/offer_with_shift_id.json](../../examples/payloads/offer_with_shift_id.json) for a minimal illustration of the field path.
 
-> **UI naming:** AlayaCare labels this value **Bundle ID** for service-offer bundles. In API responses the field name is always `shift_id`.
+> **UI naming:** AlayaCare labels this value **Bundle ID** for bundle offers. In API responses the field name is always `shift_id`.
 
 ---
 
@@ -98,7 +98,7 @@ sequenceDiagram
     participant AC as ACCloudBridge
     participant ThreeP as YourSystem
 
-    DA->>MP: Create bundle service offers
+    DA->>MP: Create bundle offer
     loop For each service in bundle
         MP->>AC: OfferMatched
         AC-->>ThreeP: sub_inbox_offers

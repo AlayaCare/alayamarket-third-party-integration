@@ -2,23 +2,24 @@
 
 Referrals are sent by demand agencies through Marketplace to authorize your organization to provide services for a client. When a referral arrives, your integration should fetch the details, optionally match to existing clients and services, and then process the referral.
 
-> **From a bundle offer:** After demand assigns an accepted multi-service bundle, you receive **one referral per service** (separate `sub_inbox_referrals` events). Process each referral with the steps below. Sibling referrals share `summary.alayamarket_shift_id`. See [Bundle Offers](bundle-offers.md).
+> **From a bundle offer:** After demand assigns an accepted multi-service bundle, you receive **one referral per service** (separate `marketplace-demand-referral` events). Process each referral with the steps below. Sibling referrals share `summary.alayamarket_shift_id`. See [Bundle Offers](bundle-offers.md).
 
 ## Prerequisites
 
 - [Environment setup](../setup.md) complete
-- `sub_inbox_referrals` event subscription active
+- `marketplace-demand-referral` event subscription active (group: `marketplace`)
 - Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
 ## Step 1: Receive the Referral Event
 
-When a demand agency sends a referral, your SQS queue receives a `sub_inbox_referrals` event payload containing the referral identifier.
+When a demand agency sends a referral, your SQS queue receives a `marketplace-demand-referral` event (example subtype: `marketplace-demand-referral-created`) containing the referral identifier.
 
-- **AsyncAPI reference:** [sub_inbox_referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)
+- **ACC event type (subscribe):** `marketplace-demand-referral`
+- **AsyncAPI schema reference:** [inbox-referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals)
 
-See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) for the full payload schema and examples.
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) for the full payload schema and examples (`ReferralCreated`, `ReferralDemandCancelled`, and related `event_name` values).
 
 ---
 
@@ -173,11 +174,11 @@ See [examples/payloads/referral_process_existing_both.json](../../examples/paylo
 
 The demand agency may cancel a referral after sending it. Your integration should listen for this event and clean up any downstream state.
 
-* **Event:** `ReferralDemandCancelled` via `sub_inbox_referrals`
+* **Event:** `ReferralDemandCancelled` on `marketplace-demand-referral` (see AsyncAPI `event_name`)
 * **When:** The demand agency cancels a referral that was previously sent to your organization.
 
 * **Recommended handling:**
-  1. Receive the `ReferralDemandCancelled` event from your SQS queue.
+  1. Receive the cancellation on your `marketplace-demand-referral` SQS subscription.
   2. Fetch the referral status to confirm cancellation.
   3. Cancel any downstream scheduling (pending visits) associated with this referral.
   4. Update your internal state to reflect the referral is no longer active.
@@ -211,7 +212,7 @@ sequenceDiagram
 
     DA->>MP: Send referral
     MP->>AC: Deliver referral
-    AC-->>3P: sub_inbox_referrals event (SQS)
+    AC-->>3P: marketplace-demand-referral (SQS)
     3P->>AC: GET referral by message ID
     AC-->>3P: Internal referral ID
     3P->>AC: GET referral details

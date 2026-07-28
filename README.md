@@ -21,14 +21,14 @@ sequenceDiagram
     participant DA as Demand Agency
 
     DA->>MP: Send Offer
-    MP->>AC: Deliver Offer (event: sub_inbox_offers)
+    MP->>AC: Deliver Offer (ACC: marketplace-demand-offer)
     AC-->>3P: Forward event via SQS
     3P->>AC: GET /api/v2/intake/offers/{id}
     3P->>AC: POST /api/v2/intake/offers/{id}/accept
     AC->>MP: Notify acceptance
 
     DA->>MP: Send Referral
-    MP->>AC: Deliver Referral (event: sub_inbox_referrals)
+    MP->>AC: Deliver Referral (ACC: marketplace-demand-referral)
     AC-->>3P: Forward event via SQS
     3P->>AC: GET /api/v2/intake/referrals/{id}
     3P->>AC: Check existing client/service

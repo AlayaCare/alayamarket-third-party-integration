@@ -1,24 +1,25 @@
 # Offers
 
-Offers are sent by demand agencies through Marketplace to your supply organization. When an offer arrives, you receive a `sub_inbox_offers` event. Your integration should fetch the offer details and respond by accepting or declining.
+Offers are sent by demand agencies through Marketplace to your supply organization. When an offer arrives, your SQS queue receives a `marketplace-demand-offer` event. Your integration should fetch the offer details and respond by accepting or declining.
 
 > **Bundle offers:** If `payload.offer.shift_id` is present on the offer details, the offer is part of a multi-service bundle. Accepting or refusing one member applies to the whole set, and assignment yields one referral per service. See [Bundle Offers](bundle-offers.md).
 
 ## Prerequisites
 
 - [Environment setup](../setup.md) complete
-- `sub_inbox_offers` event subscription active
+- `marketplace-demand-offer` event subscription active (group: `marketplace`)
 - Review [Error Handling](../error-handling.md) for status codes and retry guidance
 
 ---
 
 ## Step 1: Receive the Offer Event
 
-When a demand agency sends an offer, your SQS queue receives a `sub_inbox_offers` event payload containing the offer identifier.
+When a demand agency sends an offer, your SQS queue receives a `marketplace-demand-offer` event containing the offer identifier.
 
-- **AsyncAPI reference:** [sub_inbox_offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
+- **ACC event type (subscribe):** `marketplace-demand-offer`
+- **AsyncAPI schema reference:** [inbox-offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
 
-See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) for the full payload schema and examples.
+See the [AsyncAPI spec](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) for the full payload schema and examples (`OfferMatched`, `OfferClosed`, and related `event_name` values).
 
 ---
 
@@ -111,7 +112,7 @@ After reviewing the offer details, respond by accepting or declining.
 
 ## Step 4: Handle Offer Lifecycle Events
 
-An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen for these events via `sub_inbox_offers`, remove the offer from your pending queue, and handle them gracefully.
+An offer may be withdrawn or resolved by the demand side before your integration acts on it. Listen via `marketplace-demand-offer`, remove the offer from your pending queue, and handle lifecycle `event_name` values gracefully.
 
 | Event | Meaning | Recommended Action |
 |-------|---------|-------------------|
@@ -134,7 +135,7 @@ sequenceDiagram
 
     DA->>MP: Send offer
     MP->>AC: Deliver offer
-    AC-->>3P: sub_inbox_offers event (SQS)
+    AC-->>3P: marketplace-demand-offer (SQS)
     3P->>AC: GET offer by external ID
     AC-->>3P: Internal offer ID
     3P->>AC: GET offer details

@@ -2,6 +2,8 @@
 
 Referrals are sent by demand agencies through Marketplace to authorize your organization to provide services for a client. When a referral arrives, your integration should fetch the details, optionally match to existing clients and services, and then process the referral.
 
+> **From a bundle offer:** After demand assigns an accepted multi-service bundle, you receive **one referral per service** (separate `sub_inbox_referrals` events). Process each referral with the steps below. Sibling referrals share `summary.alayamarket_shift_id`. See [Bundle Offers](bundle-offers.md).
+
 ## Prerequisites
 
 - [Environment setup](../setup.md) complete

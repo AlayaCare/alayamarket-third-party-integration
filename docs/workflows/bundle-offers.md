@@ -9,7 +9,7 @@ This page extends the base [Offers](offers.md) and [Referrals](referrals.md) wor
 ## Prerequisites
 
 - Complete the [Offers](offers.md) workflow first
-- `sub_inbox_offers` (and later `sub_inbox_referrals`) event subscriptions active
+- `marketplace-demand-offer` (and later `marketplace-demand-referral`) event subscriptions active (group: `marketplace`)
 
 ---
 
@@ -17,7 +17,7 @@ This page extends the base [Offers](offers.md) and [Referrals](referrals.md) wor
 
 | Topic | Single offer | Bundle offers |
 |-------|--------------|---------------|
-| Events | One `sub_inbox_offers` event | One event **per** service in the bundle |
+| Events | One `marketplace-demand-offer` event | One event **per** service in the bundle |
 | Grouping field | `payload.offer.shift_id` is null / absent | Same non-null `payload.offer.shift_id` on every member |
 | Accept / refuse | Acts on that offer only | Acting on **any** member accepts or refuses **all** members |
 | After assignment | One referral | One referral **per** service (N referrals) |
@@ -29,11 +29,12 @@ This page extends the base [Offers](offers.md) and [Referrals](referrals.md) wor
 
 Demand creates a bundle offer. Marketplace delivers a separate match for each service in the set.
 
-Your SQS queue receives **N** `sub_inbox_offers` events (typically `OfferMatched`), each with its own `offer_id`.
+Your SQS queue receives **N** `marketplace-demand-offer` events (typically `OfferMatched`), each with its own `offer_id`.
 
 The event envelope identifies a **single** offer — it does **not** include `shift_id` or a bundle id. You discover grouping when you fetch offer details.
 
-- **AsyncAPI reference:** [sub_inbox_offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
+- **ACC event type (subscribe):** `marketplace-demand-offer`
+- **AsyncAPI schema reference:** [inbox-offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers)
 
 ---
 
@@ -76,7 +77,7 @@ Lifecycle events (`OfferClosed`, `OfferExpired`, `OfferFulfilled`) still arrive 
 When demand **assigns** the accepted bundle (manually or via auto-assign):
 
 1. Marketplace creates **one referral per service** in the bundle (N referrals for N services), not a single “bundle referral.”
-2. Your queue receives **N** `sub_inbox_referrals` events (for example `ReferralCreated`), each with its own referral id.
+2. Your queue receives **N** `marketplace-demand-referral` events (for example `ReferralCreated`), each with its own referral id.
 3. Fetch and process **each** referral with the strategies in [Referrals](referrals.md). There is no “process entire bundle” endpoint.
 
 ### Correlating sibling referrals
@@ -101,7 +102,7 @@ sequenceDiagram
     DA->>MP: Create bundle offer
     loop For each service in bundle
         MP->>AC: OfferMatched
-        AC-->>ThreeP: sub_inbox_offers
+        AC-->>ThreeP: marketplace-demand-offer
         ThreeP->>AC: GET offer details
         AC-->>ThreeP: payload.offer.shift_id shared
     end
@@ -110,7 +111,7 @@ sequenceDiagram
     DA->>MP: Assign bundle
     loop For each assigned service
         MP->>AC: ReferralCreated
-        AC-->>ThreeP: sub_inbox_referrals
+        AC-->>ThreeP: marketplace-demand-referral
         ThreeP->>AC: GET referral then POST process
     end
 ```

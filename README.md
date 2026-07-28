@@ -21,7 +21,7 @@ sequenceDiagram
     participant DA as Demand Agency
 
     DA->>MP: Send Offer
-    MP->>AC: Deliver Offer (ACC: marketplace-demand-offer when live)
+    MP->>AC: Deliver Offer (ACC: marketplace-demand-offer)
     AC-->>3P: Forward event via SQS
     3P->>AC: GET /api/v2/intake/offers/{id}
     3P->>AC: POST /api/v2/intake/offers/{id}/accept

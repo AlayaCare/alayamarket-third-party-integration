@@ -59,15 +59,13 @@ Subscribe using the **ACC event type** strings below. These are the values shown
 
 ### Required Event Subscriptions (supply partners)
 
-| ACC event type (subscribe) | Status | Description | Example subtype | AsyncAPI channel (schema) |
-|----------------------------|--------|-------------|-----------------|---------------------------|
-| `marketplace-demand-referral` | Live | Referrals sent by demand agencies | `marketplace-demand-referral-created` | [inbox-referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) |
-| `marketplace-demand-message` | Live | Messages sent by demand agencies | `marketplace-demand-message-sent` | [inbox-messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages) |
-| `marketplace-demand-offer` | Not live yet | Offers from demand agencies | — | [inbox-offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) |
+| ACC event type (subscribe) | Description | Example subtype | AsyncAPI channel (schema) |
+|----------------------------|-------------|-----------------|---------------------------|
+| `marketplace-demand-offer` | Offers from demand agencies | `marketplace-demand-offer-matched` | [inbox-offers](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_offers) |
+| `marketplace-demand-referral` | Referrals sent by demand agencies | `marketplace-demand-referral-created` | [inbox-referrals](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_referrals) |
+| `marketplace-demand-message` | Messages sent by demand agencies | `marketplace-demand-message-sent` | [inbox-messages](https://alayacare.github.io/alayamarket-external-docs/docs/offers/asyncapi.external.offers/#operation-send-sub_inbox_messages) |
 
-When an event fires, your SQS queue receives a payload with a `subtype` and identifiers you use to fetch full details via the corresponding API (see workflow guides). Use the AsyncAPI links for payload schema and internal `event_name` values (`ReferralCreated`, `MessageDemandSent`, and so on) — not as the subscription name in ACC.
-
-> **Offers:** ACC registration for offer events is not available in the SQS UI yet. Keep following the [Offers](workflows/offers.md) API workflow; subscribe to `marketplace-demand-offer` when your AlayaCare contact confirms it is live.
+When an event fires, your SQS queue receives a payload with a `subtype` and identifiers you use to fetch full details via the corresponding API (see workflow guides). Use the AsyncAPI links for payload schema and internal `event_name` values (`OfferMatched`, `ReferralCreated`, `MessageDemandSent`, and so on) — not as the subscription name in ACC.
 
 ### Event naming
 
@@ -101,7 +99,7 @@ Before starting development, confirm:
 
 - [ ] Provisioned branch URL and credentials received
 - [ ] API integration created and tested (try `GET $ACCLOUD_URL/ext/api/v2/patients/clients?page=1&count=1`)
-- [ ] SQS queue subscribed to `marketplace-demand-referral` and `marketplace-demand-message` (group: `marketplace`)
+- [ ] SQS queue subscribed to `marketplace-demand-offer`, `marketplace-demand-referral`, and `marketplace-demand-message` (group: `marketplace`)
 - [ ] Event delivery confirmed in your queue
 
 ## Next Steps
